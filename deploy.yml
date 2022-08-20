@@ -25,6 +25,9 @@ spec:
       containers:
         - image: compumike/hairpin-proxy-haproxy:0.2.1
           name: main
+          env:
+            - name: TARGET_SERVER
+              value: istio-ingressgateway.istio-system.svc.cluster.local
           resources:
             requests:
               memory: "100Mi"
@@ -153,7 +156,7 @@ spec:
         runAsUser: 405
         runAsGroup: 65533
       containers:
-        - image: compumike/hairpin-proxy-controller:0.2.1
+        - image: blueraccoontech/hairpin-proxy-controller:0.2.1
           name: main
           resources:
             requests:

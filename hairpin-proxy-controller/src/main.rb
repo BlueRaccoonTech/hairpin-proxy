@@ -11,10 +11,9 @@ class HairpinProxyController
   DNS_REWRITE_DESTINATION = "hairpin-proxy.hairpin-proxy.svc.cluster.local"
   POLL_INTERVAL = ENV.fetch("POLL_INTERVAL", "15").to_i.clamp(1..)
 
-  # Kubernetes <= 1.18 puts Ingress in "extensions/v1beta1"
-  # Kubernetes >= 1.19 puts Ingress in "networking.k8s.io/v1"
-  # (We search both for maximum compatibility.)
-  INGRESS_API_VERSIONS = ["extensions/v1beta1", "networking.k8s.io/v1"].freeze
+  # What if we're not using ingress at all, but instead are using Istio gateways?
+  # Well, then the gateway APIs won't return anything at all. Let's use these instead.
+  INGRESS_API_VERSIONS = ["networking.istio.io/v1alpha3", "networking.istio.io/v1beta1"].freeze
 
   def initialize
     @k8s = K8s::Client.in_cluster_config
@@ -27,14 +26,16 @@ class HairpinProxyController
     # Return a sorted Array of all unique hostnames mentioned in Ingress spec.tls.hosts blocks, in all namespaces.
     all_ingresses = INGRESS_API_VERSIONS.map { |api_version|
       begin
-        @k8s.api(api_version).resource("ingresses").list
+        @k8s.api(api_version).resource("gateway").list
       rescue K8s::Error::NotFound, K8s::Error::UndefinedResource
         @log.warn("Warning: Unable to list ingresses in #{api_version}")
         []
       end
     }.flatten
-    all_tls_blocks = all_ingresses.map { |r| r.spec.tls }.flatten.compact
-    hosts = all_tls_blocks.map(&:hosts).flatten.compact
+#    all_tls_blocks = all_ingresses.map { |r| r.spec.tls }.flatten.compact
+#    hosts = all_tls_blocks.map(&:hosts).flatten.compact
+    all_server_blocks = all_ingresses.map { |r| r.spec.servers }.flatten.compact
+    hosts = all_server_blocks.map(&:hosts).flatten.compact
     hosts.filter! { |host| /\A[A-Za-z0-9.\-_]+\z/.match?(host) }
     hosts.sort.uniq
   end

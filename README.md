@@ -1,4 +1,10 @@
-# hairpin-proxy
+# hairpin-proxy, istio flavour
+
+A hack/fork of compumike's hairpin-proxy to instead refer to istio gateways instead of ingress objects. Also by default modifies TARGET_SERVER environment variable to refer to the istio ingress gateway.
+
+This hack assumes all hosts have SSL. This is probably a bad assumption, but I know just enough Ruby to make small changes to code, and the difference between ingress files and istio gateways is *just* enough so that I'm not sure how to get *just* the hosts with SSL.
+
+Rest of the original readme (with slight mods to link to this repo) follows:
 
 PROXY protocol support for internal-to-LoadBalancer traffic for Kubernetes Ingress users, specifically for cert-manager self-checks.
 
@@ -7,10 +13,10 @@ If you've had problems with ingress-nginx, cert-manager, LetsEncrypt ACME HTTP01
 ## One-line install
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/compumike/hairpin-proxy/v0.2.1/deploy.yml
+kubectl apply -f https://raw.githubusercontent.com/BlueRaccoonTech/hairpin-proxy/master/deploy.yml
 ```
 
-If you're using [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) and [cert-manager](https://github.com/jetstack/cert-manager), it will work out of the box. See detailed installation and testing instructions below.
+If you're using ~~[ingress-nginx](https://kubernetes.github.io/ingress-nginx/)~~ istio gateways and [cert-manager](https://github.com/jetstack/cert-manager), it ~~will~~ should work out of the box. See detailed installation and testing instructions below.
 
 ## The PROXY Protocol
 
@@ -72,12 +78,12 @@ The `dig` should show the external load balancer IP address. The first `curl` sh
 ### Step 1: Install hairpin-proxy in your Kubernetes cluster
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/compumike/hairpin-proxy/v0.2.1/deploy.yml
+kubectl apply -f https://raw.githubusercontent.com/BlueRaccoonTech/hairpin-proxy/master/deploy.yml
 ```
 
-If you're using `ingress-nginx`, this will work as-is.
+If you're using `istio-ingressgateway`, this should work as-is.
 
-However, if you using an ingress controller other than `ingress-nginx`, you must change the `TARGET_SERVER` environment variable passed to the `hairpin-proxy-haproxy` container. It defaults to `ingress-nginx-controller.ingress-nginx.svc.cluster.local`, which specifies the `ingress-nginx-controller` Service within the `ingress-nginx` namespace. You can change this by editing the `hairpin-proxy-haproxy` Deployment and specifiying an environment variable:
+However, if you using an ingress controller other than `istio-ingressgateway`, you must change the `TARGET_SERVER` environment variable passed to the `hairpin-proxy-haproxy` container. It defaults to `istio-ingressgateway.istio-system.svc.cluster.local`, which specifies the `istio-ingressgateway` Service within the `istio-system` namespace. You can change this by editing the `hairpin-proxy-haproxy` Deployment and specifiying an environment variable:
 
 ```shell
 kubectl edit -n hairpin-proxy deployment hairpin-proxy-haproxy
@@ -129,5 +135,5 @@ To resolve this, we need to rewrite the DNS on the Node itself. The Node does no
 To install this DaemonSet:
 
 ```shell
-kubectl apply -f https://raw.githubusercontent.com/compumike/hairpin-proxy/v0.2.1/deploy-etchosts-daemonset.yml
+kubectl apply -f https://raw.githubusercontent.com/BlueRaccoonTech/hairpin-proxy/master/deploy-etchosts-daemonset.yml
 ```

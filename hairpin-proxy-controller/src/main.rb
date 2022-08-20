@@ -26,7 +26,7 @@ class HairpinProxyController
     # Return a sorted Array of all unique hostnames mentioned in Ingress spec.tls.hosts blocks, in all namespaces.
     all_ingresses = INGRESS_API_VERSIONS.map { |api_version|
       begin
-        @k8s.api(api_version).resource("gateway").list
+        @k8s.api(api_version).resource("gateways").list
       rescue K8s::Error::NotFound, K8s::Error::UndefinedResource
         @log.warn("Warning: Unable to list ingresses in #{api_version}")
         []

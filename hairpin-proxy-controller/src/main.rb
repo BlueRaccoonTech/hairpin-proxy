@@ -11,8 +11,6 @@ class HairpinProxyController
   DNS_REWRITE_DESTINATION = "hairpin-proxy.hairpin-proxy.svc.cluster.local"
   POLL_INTERVAL = ENV.fetch("POLL_INTERVAL", "15").to_i.clamp(1..)
 
-  # What if we're not using ingress at all, but instead are using Istio gateways?
-  # Well, then the gateway APIs won't return anything at all. Let's use these instead.
   INGRESS_API_VERSIONS = ["networking.istio.io/v1alpha3", "networking.istio.io/v1beta1"].freeze
 
   def initialize
@@ -32,8 +30,6 @@ class HairpinProxyController
         []
       end
     }.flatten
-#    all_tls_blocks = all_ingresses.map { |r| r.spec.tls }.flatten.compact
-#    hosts = all_tls_blocks.map(&:hosts).flatten.compact
     all_server_blocks = all_ingresses.map { |r| r.spec.servers }.flatten.compact
     hosts = all_server_blocks.map(&:hosts).flatten.compact
     hosts.filter! { |host| /\A[A-Za-z0-9.\-_]+\z/.match?(host) }

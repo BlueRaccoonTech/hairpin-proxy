@@ -16,7 +16,7 @@ spec:
     spec:
       serviceAccountName: hairpin-proxy-controller-sa
       containers:
-        - image: blueraccoontech/hairpin-proxy-controller:latest
+        - image: blueraccoontech/hairpin-proxy-controller:0.2.1-brt.0
           name: main
           command: ["/app/src/main.rb", "--etc-hosts", "/app/etchosts"]
           volumeMounts:

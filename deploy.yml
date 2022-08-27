@@ -156,7 +156,7 @@ spec:
         runAsUser: 405
         runAsGroup: 65533
       containers:
-        - image: blueraccoontech/hairpin-proxy-controller:latest
+        - image: blueraccoontech/hairpin-proxy-controller:0.2.1-brt.0
           name: main
           resources:
             requests:
